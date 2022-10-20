@@ -59,8 +59,11 @@ contract Bank is ERC20 {
             _amount >= 1e16,
             "Error: Deposit must be greater than 0.01 ETH"
         );
+        require(
+            msg.value == _amount, "You are depositing amount and wallet amount is not same!"
+        );
         //increase msg.sender ether deposit balance
-        etherBalanceOf[msg.sender] = etherBalanceOf[msg.sender] +_amount;
+        etherBalanceOf[msg.sender] = etherBalanceOf[msg.sender] + msg.value;
         //start msg.sender hodling time
         depositStart[msg.sender] = depositStart[msg.sender] + block.timestamp;
         //set msg.sender deposit status to true
@@ -69,13 +72,10 @@ contract Bank is ERC20 {
         emit Deposit(msg.sender, _amount, block.timestamp);
     }
 
-    function withdraw(uint256 _amount) public {
+    function withdraw() public {
         //check if msg.sender deposit status is true
         require(isDeposited[msg.sender] == true, "Error: No previous deposit");
-        // Check to ensure that WithDraw Can't be more than Deposit
-        // require(etherBalanceOf[msg.sender] >= _amount, "Error: WithDraw Can't be more than Deposit");
-        if(etherBalanceOf[msg.sender] >= _amount){
-
+    
         //assign msg.sender ether deposit balance to variable for event
         uint256 userBalance = etherBalanceOf[msg.sender];
         //check user's hodl time
@@ -93,7 +93,7 @@ contract Bank is ERC20 {
         etherBalanceOf[msg.sender] = 0;
         isDeposited[msg.sender] = false;
         emit Withdraw(msg.sender, userBalance, depositTime, interest);
-        }
+        
 
     }
 
