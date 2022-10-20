@@ -48,20 +48,14 @@ contract Bank is ERC20 {
     }
 
 
-    function deposit(uint256 _amount) public payable {
-        //check if msg.sender didn't already deposited funds
-        require(
-            isDeposited[msg.sender] == false,
-            "Error: Deposit already active"
-        );
+    function deposit() public payable {
+
         //check if msg.value is >= than 0.01 ETH
         require(
-            _amount >= 1e16,
+            msg.value >= 1e16,
             "Error: Deposit must be greater than 0.01 ETH"
         );
-        require(
-            msg.value == _amount, "You are depositing amount and wallet amount is not same!"
-        );
+
         //increase msg.sender ether deposit balance
         etherBalanceOf[msg.sender] = etherBalanceOf[msg.sender] + msg.value;
         //start msg.sender hodling time
@@ -72,7 +66,7 @@ contract Bank is ERC20 {
         emit Deposit(msg.sender, _amount, block.timestamp);
     }
 
-    function withdraw() public {
+    function withdraw(uint256 amount) public {
         //check if msg.sender deposit status is true
         require(isDeposited[msg.sender] == true, "Error: No previous deposit");
     
@@ -85,7 +79,9 @@ contract Bank is ERC20 {
         //calc accrued interest
         uint256 interest = interestPerSecond * depositTime;
         //send eth to user
-        payable(msg.sender).transfer(userBalance);
+
+        payable(msg.sender).transfer(amount);
+        etherBalanceOf[msg.sender] = etherBalanceOf[msg.sender] - amount;
         //send interest in tokens to user
         mint(msg.sender, interest);
         //reset depositer data
