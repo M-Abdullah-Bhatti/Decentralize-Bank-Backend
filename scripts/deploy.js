@@ -9,10 +9,8 @@ async function main() {
   await dbank.deployed();
 
   console.log("DBank deployed to:", dbank.address);
-
-  //   await verify(dBank.address, args);
-
-  log("----------------------------------------------------");
+  args = [];
+  await verify(dbank.address, args);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
