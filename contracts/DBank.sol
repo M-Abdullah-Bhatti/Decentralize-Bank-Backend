@@ -3,6 +3,7 @@
 pragma solidity ^0.8.10;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 error Bank__MsgSender_NotMinter();
 error Bank__LessDeposit(string);
@@ -11,8 +12,10 @@ error Bank__OverWithDraw(string);
 error Bank__LessCollateral(string);
 error Bank__LoanAlreadyActive();
 error Bank__NoActiveLoan();
+error Bank__AddressNotApprovedForPayOff();
+error Bank__TokensNotTransferred();
 
-contract Bank is ERC20 {
+contract DBank is ERC20, ReentrancyGuard {
     // BankToken private token;
     address public minter;
 
@@ -67,8 +70,14 @@ contract Bank is ERC20 {
         //     msg.value >= 1e16,
         //     "Error: Deposit must be greater than 0.01 ETH"
         // );
-        if (msg.value <= 1e16) {
-            revert Bank__LessDeposit("Deposit must be greater than 0.01 ETH");
+        // if (msg.value < 1e16) {
+        //     revert Bank__LessDeposit("Deposit must be greater than 0.01 ETH");
+        // }
+
+         if (msg.value <= 0) {
+            revert Bank__LessCollateral(
+                "Collateral amount must be greater than 0 ETH"
+            );
         }
 
         //increase msg.sender ether deposit balance
@@ -81,7 +90,7 @@ contract Bank is ERC20 {
         emit Deposit(msg.sender, msg.value, block.timestamp);
     }
 
-    function withdraw(uint256 amount) public payable{
+    function withdraw(uint256 amount) public nonReentrant{
         //check if msg.sender deposit status is true
         // require(isDeposited[msg.sender] == true, "Error: No previous deposit");
         if (isDeposited[msg.sender] == false) {
@@ -108,13 +117,15 @@ contract Bank is ERC20 {
         //send interest in tokens to user
         mint(msg.sender, interest);
         //reset depositer data
-        
-        // isDeposited[msg.sender] = false;
-        depositStart[msg.sender] = 0;
+        if( etherBalanceOf[msg.sender] == 0){
+            isDeposited[msg.sender] = false;
+            depositStart[msg.sender] = 0;
+        }
+      
         emit Withdraw(msg.sender, userBalance, depositTime, interest);
     }
 
-    function borrow() public payable {
+    function borrow() public payable nonReentrant{
         //check if user doesn't have active loan
         // require(
         //     isBorrowed[msg.sender] == false,
@@ -129,9 +140,16 @@ contract Bank is ERC20 {
         //     msg.value >= 1e16,
         //     "Error: Collateral amount must be greater than 0.01 ETH"
         // );
-        if (msg.value <= 1e16) {
+
+        // if (msg.value < 1e16) {
+        //     revert Bank__LessCollateral(
+        //         "Collateral amount must be greater than 0.01 ETH"
+        //     );
+        // }
+
+        if (msg.value <= 0) {
             revert Bank__LessCollateral(
-                "Collateral amount must be greater than 0.01 ETH"
+                "Collateral amount must be greater than 0 ETH"
             );
         }
 
@@ -158,20 +176,31 @@ contract Bank is ERC20 {
         }
 
         // first you have to approve the msg.sender to tranfer the tokens
-        require(
-            approve(msg.sender, collateralEther[msg.sender] / 2),
-            "This address is not approved for transferring token"
-        );
+        // require(
+        //     approve(msg.sender, collateralEther[msg.sender] / 2),
+        //     "This address is not approved for transferring token"
+        // );
+
+        bool isApproved = approve(msg.sender, collateralEther[msg.sender] / 2);
+        if(!isApproved){
+            revert Bank__AddressNotApprovedForPayOff();
+        }
 
         //transfer tokens from user back to the contract
-        require(
-            transferFrom(
-                msg.sender,
-                address(this),
-                collateralEther[msg.sender] / 2
-            ),
-            "Error: Cannot receive tokens"
-        );
+        // require(
+            // transferFrom(
+            //     msg.sender,
+            //     address(this),
+            //     collateralEther[msg.sender] / 2
+            // ),
+        //     "Error: Cannot receive tokens"
+        // );
+
+        bool isTransfered = transferFrom(msg.sender, address(this), collateralEther[msg.sender] / 2);
+        if(!isTransfered){
+            revert Bank__TokensNotTransferred();
+        }
+
         //calc 10% fee
         uint256 fee = collateralEther[msg.sender] / 10;
         //send user's collateral minus fee
@@ -205,3 +234,8 @@ contract Bank is ERC20 {
         return isBorrowed[user];
     }
 }
+
+	// 0x20775d300BdE943Ac260995E977fb915fB01f399
+
+
+    // 0x20775d300BdE943Ac260995E977fb915fB01f399
