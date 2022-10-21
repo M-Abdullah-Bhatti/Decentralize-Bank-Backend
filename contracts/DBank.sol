@@ -92,7 +92,7 @@ contract Bank is ERC20 {
         uint256 userBalance = etherBalanceOf[msg.sender];
 
         // require(amount <= userBalance, "Error: Withdraw can't be more than deposit");
-        if (amount >= userBalance) {
+        if (amount > userBalance) {
             revert Bank__OverWithDraw("Withdraw can't be more than deposit");
         }
         //check user's hodl time
@@ -111,7 +111,6 @@ contract Bank is ERC20 {
         
         // isDeposited[msg.sender] = false;
         depositStart[msg.sender] = 0;
-        etherBalanceOf[msg.sender] = 0;
         emit Withdraw(msg.sender, userBalance, depositTime, interest);
     }
 
