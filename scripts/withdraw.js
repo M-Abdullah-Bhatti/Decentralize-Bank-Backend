@@ -17,7 +17,7 @@ async function printBalances(addresses) {
   }
 }
 
-async function deposit() {
+async function withdraw() {
   const [customer] = await hre.ethers.getSigners();
 
   const dbank = await ethers.getContract("DBank");
@@ -26,13 +26,14 @@ async function deposit() {
   console.log("== start ==");
   await printBalances(addresses);
 
-  await dbank.connect(customer).deposit({ value: PRICE });
+  // await dbank.connect(customer).deposit({ value: PRICE });
+  await dbank.connect(customer).withdraw(PRICE);
 
-  console.log("== deposit ==");
+  console.log("== withdraw ==");
   await printBalances(addresses);
 }
 
-deposit()
+withdraw()
   .then(() => process.exit(0))
   .catch((error) => {
     console.error(error);

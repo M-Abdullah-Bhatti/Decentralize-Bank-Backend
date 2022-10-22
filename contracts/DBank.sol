@@ -1,3 +1,4 @@
+// new contract:
 // SPDX-License-Identifier:MIT
 
 pragma solidity ^0.8.10;
@@ -20,7 +21,7 @@ contract DBank is ERC20, ReentrancyGuard {
     address public minter;
 
     // Mappings
-    mapping(address => uint256) private etherBalanceOf;
+    mapping(address => uint256) public etherBalanceOf;
     mapping(address => uint256) private depositStart;
     mapping(address => uint256) private collateralEther;
 
@@ -54,7 +55,7 @@ contract DBank is ERC20, ReentrancyGuard {
         _;
     }
 
-    function mint(address account, uint256 amount) public onlyAdmin {
+    function mint(address account, uint256 amount)  internal  {
         _mint(account, amount);
     }
 
@@ -90,7 +91,7 @@ contract DBank is ERC20, ReentrancyGuard {
         emit Deposit(msg.sender, msg.value, block.timestamp);
     }
 
-    function withdraw(uint256 amount) public nonReentrant{
+    function withdraw(uint256 amount) payable public nonReentrant{
         //check if msg.sender deposit status is true
         // require(isDeposited[msg.sender] == true, "Error: No previous deposit");
         if (isDeposited[msg.sender] == false) {
@@ -235,7 +236,7 @@ contract DBank is ERC20, ReentrancyGuard {
     }
 }
 
-	// 0x20775d300BdE943Ac260995E977fb915fB01f399
 
 
-    // 0x20775d300BdE943Ac260995E977fb915fB01f399
+
+

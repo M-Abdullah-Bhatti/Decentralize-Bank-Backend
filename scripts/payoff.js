@@ -1,7 +1,7 @@
 // const { ethers, network } = require("hardhat");
 const { Signer } = require("ethers");
 const { network, ethers, getNamedAccounts } = require("hardhat");
-const PRICE = ethers.utils.parseEther("0.001");
+const PRICE = ethers.utils.parseEther("2");
 
 async function getBalance(address) {
   const balanceBigInt = await hre.waffle.provider.getBalance(address);
@@ -17,7 +17,7 @@ async function printBalances(addresses) {
   }
 }
 
-async function deposit() {
+async function payoff() {
   const [customer] = await hre.ethers.getSigners();
 
   const dbank = await ethers.getContract("DBank");
@@ -26,13 +26,13 @@ async function deposit() {
   console.log("== start ==");
   await printBalances(addresses);
 
-  await dbank.connect(customer).deposit({ value: PRICE });
+  await dbank.connect(customer).payOff();
 
-  console.log("== deposit ==");
+  console.log("== payoff ==");
   await printBalances(addresses);
 }
 
-deposit()
+payoff()
   .then(() => process.exit(0))
   .catch((error) => {
     console.error(error);
