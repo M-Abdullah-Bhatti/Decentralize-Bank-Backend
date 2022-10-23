@@ -40,7 +40,6 @@ const { developmentChains } = require("../../helper-hardhat-config");
 
           // getUserBalance
           const getUserBalance = await dBank.getEtherBalanceOf();
-          // console.log("User balance " + getUserBalance);
 
           // getDepositStartTime
           const getDepositStartTime = await dBank.getDepositStartTime(
@@ -100,10 +99,6 @@ const { developmentChains } = require("../../helper-hardhat-config");
         // ==================================
 
         describe("borrow", function () {
-          // beforeEach(async () => {
-          //   await dBank.deposit({ value: PRICE });
-          // });
-
           it("emits an event after borrowing an amount", async function () {
             expect(await dBank.borrow({ value: PRICE })).to.emit("Borrow");
           });
@@ -176,5 +171,3 @@ const { developmentChains } = require("../../helper-hardhat-config");
         });
       });
     });
-
-// balanceOf[msg.sender] ---> tokens

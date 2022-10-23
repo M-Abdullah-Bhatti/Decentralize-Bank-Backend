@@ -66,15 +66,7 @@ contract DBank is ERC20, ReentrancyGuard {
     }
 
     function deposit() public payable {
-        //check if msg.value is >= than 0.01 ETH
-        // require(
-        //     msg.value >= 1e16,
-        //     "Error: Deposit must be greater than 0.01 ETH"
-        // );
-        // if (msg.value < 1e16) {
-        //     revert Bank__LessDeposit("Deposit must be greater than 0.01 ETH");
-        // }
-
+       
          if (msg.value <= 0) {
             revert Bank__LessCollateral(
                 "Collateral amount must be greater than 0 ETH"
@@ -93,7 +85,7 @@ contract DBank is ERC20, ReentrancyGuard {
 
     function withdraw(uint256 amount) payable public nonReentrant{
         //check if msg.sender deposit status is true
-        // require(isDeposited[msg.sender] == true, "Error: No previous deposit");
+       
         if (isDeposited[msg.sender] == false) {
             revert Bank__NoPreviousDeposit();
         }
@@ -101,7 +93,7 @@ contract DBank is ERC20, ReentrancyGuard {
         //assign msg.sender ether deposit balance to variable for event
         uint256 userBalance = etherBalanceOf[msg.sender];
 
-        // require(amount <= userBalance, "Error: Withdraw can't be more than deposit");
+       
         if (amount > userBalance) {
             revert Bank__OverWithDraw("Withdraw can't be more than deposit");
         }
@@ -127,26 +119,10 @@ contract DBank is ERC20, ReentrancyGuard {
     }
 
     function borrow() public payable nonReentrant{
-        //check if user doesn't have active loan
-        // require(
-        //     isBorrowed[msg.sender] == false,
-        //     "Error: Loan is already active"
-        // );
+       
         if (isBorrowed[msg.sender] == true) {
             revert Bank__LoanAlreadyActive();
         }
-
-        //check if collateral is >= than 0.01 ETH
-        // require(
-        //     msg.value >= 1e16,
-        //     "Error: Collateral amount must be greater than 0.01 ETH"
-        // );
-
-        // if (msg.value < 1e16) {
-        //     revert Bank__LessCollateral(
-        //         "Collateral amount must be greater than 0.01 ETH"
-        //     );
-        // }
 
         if (msg.value <= 0) {
             revert Bank__LessCollateral(
@@ -167,36 +143,16 @@ contract DBank is ERC20, ReentrancyGuard {
     }
 
     function payOff() public {
-        //check if loan is active
-        // require(
-        //     isBorrowed[msg.sender] == true,
-        //     "Error: User Doesn;t have any active loan"
-        // );
+       
         if(isBorrowed[msg.sender] ==false ){
             revert Bank__NoActiveLoan();
         }
-
-        // first you have to approve the msg.sender to tranfer the tokens
-        // require(
-        //     approve(msg.sender, collateralEther[msg.sender] / 2),
-        //     "This address is not approved for transferring token"
-        // );
 
         bool isApproved = approve(msg.sender, collateralEther[msg.sender] / 2);
         if(!isApproved){
             revert Bank__AddressNotApprovedForPayOff();
         }
-
-        //transfer tokens from user back to the contract
-        // require(
-            // transferFrom(
-            //     msg.sender,
-            //     address(this),
-            //     collateralEther[msg.sender] / 2
-            // ),
-        //     "Error: Cannot receive tokens"
-        // );
-
+     
         bool isTransfered = transferFrom(msg.sender, address(this), collateralEther[msg.sender] / 2);
         if(!isTransfered){
             revert Bank__TokensNotTransferred();
