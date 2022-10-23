@@ -84,6 +84,17 @@ const { developmentChains } = require("../../helper-hardhat-config");
                     await expect(dBank.withdraw(MOREPRICE)).to.be.revertedWith(error);
                 });
 
+                it("Checks if amount is transferred to msg.sender", async function() {
+                    // getUserBalance
+                    const getUserBalance = await dBank.getEtherBalanceOf();
+                    const withdrawAmount = await dBank.withdraw(PRICE);
+                    const getUserNewBalance = await dBank.getEtherBalanceOf();
+                    assert(
+                        PRICE.toString() ==
+                        (getUserBalance - getUserNewBalance).toString()
+                    );
+                });
+
                 // it("Checks balances of etherBalanceOf, depositStart, isDeposited", async function() {
                 //     await dBank.deposit({ value: PRICE });
 
